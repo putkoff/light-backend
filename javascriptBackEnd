@@ -1,0 +1,458 @@
+<script>
+window.onload = getAccount();
+
+
+async function getAccount() {
+    if (window.ethereum) {
+          handleEthereum();
+        } else {
+          window.addEventListener('ethereum#initialized', handleEthereum, {
+            once: true,
+          });
+          setTimeout(handleEthereum, 3000);
+        }
+        
+        function handleEthereum() {
+          const { ethereum } = window;
+          if (ethereum && ethereum.isMetaMask) {
+            console.log('Ethereum successfully detected!');
+            // Access the decentralized web!
+          } else {
+            console.log('Please install MetaMask!');
+          }
+        }
+    
+    accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+    
+    const account = accounts[0];
+    getTokenBalance(account);
+    getProtoAmt(account);
+    
+    }
+
+
+function feequery(ints){
+    var _intervals = ascii_to_hex(ints);
+    let _join = ['0x276516e7',_intervals];
+    var _hex =  _join.join('');
+    return _hex;
+}
+function loadFile(filePath) {
+  var result = null;
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open('GET', filePath, false);
+  xmlhttp.send();
+  if (xmlhttp.status==200) {
+    result = xmlhttp.responseText;
+  }
+  return result;
+}
+function readTextFile(file) {
+var rawFile = new XMLHttpRequest();
+rawFile.open("GET", file, false);
+rawFile.onreadystatechange = function ()
+{
+    if(rawFile.readyState === 4)
+    {
+        if(rawFile.status === 200 || rawFile.status == 0)
+        {
+            var allText = rawFile.responseText;
+            alert(allText);
+        }
+    }
+}
+rawFile.send(null);
+}
+function stringIt(x){
+    return x.toString();
+}
+function concateIt(x){
+    if(isArray(x) == false){
+        return x
+    }
+    n = x[0];
+    for(let i=1;i<x.length;i++){
+        n = n.concat(x[i]);
+        if(isString(n) == false){
+            n = numToString(n);
+        }
+    }
+    return n;
+}
+function isString(x){   
+    if (typeof x === 'string' || x instanceof String){
+        return true;
+    }
+    return false;
+}
+function isArray(x){
+    if (x instanceof Array) {
+      return true;
+    }
+    return false;
+}
+function fits(x) {
+  if (Number.isInteger(x)) {
+    return true;
+  }
+  return false;
+}
+function numToString(x){
+    return String(x);
+}
+function stringToNum(x){
+    if(isString(x) == true){
+        if(x.includes('.')==false){
+            return parseInt(x);
+        }else{
+            return parseFloat(x);
+        }
+    }
+    return x;
+}
+function checkAllNum(x){
+    if(isArray(x) == false){
+        x = [x]
+    }
+    let ls = [];
+    for(let i=0;i<x.length;i++){
+        let n = x[i]; 
+        if(isString(n) == true){
+            n = stringToNum(n)
+        }
+        ls.push(n);
+    }
+    return ls;
+}
+function bigNumToDec(x,k){
+    return x*(10**-k);
+}
+function decToBigNum(x,k){
+    x = checkAllNum([x,k]);
+    return x[0]*(10**x[1]);
+}
+function decTohex(x){
+    let number = x;
+    let hexStr = number.toString(16);
+    console.log(hexStr);
+    return concateIt(['0x',hexStr]);
+}
+function hexToDec(x){
+    let hexStr = x; 
+    let number = parseInt(hexStr, 16);
+    console.log(number);
+    return number;
+}
+function roundNumber(num, scale) {
+  if(!("" + num).includes("e")) {
+    return +(Math.round(num + "e+" + scale)  + "e-" + scale);
+  } else {
+    var arr = ("" + num).split("e");
+    var sig = ""
+    if(+arr[1] + scale > 0) {
+      sig = "+";
+    }
+    return +(Math.round(+arr[0] + "e" + sig + (+arr[1] + scale)) + "e-" + scale);
+  }
+}
+function getNFTask(x,i){
+    let _id = concateIt(['NFT',numToString(i+1)]);
+    let num = roundNumber(bigNumToDec(stringToNum(x),18),2);
+    document.getElementById(_id).innerHTML = concateIt(['<img class="seicon" src="assets/images/metamask.svg"> ',numToString(num),' AVAX']);
+    document.getElementById(_id).value = decTohex(decToBigNum(num,18));
+}
+function encodeToData(x,y){
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    return web3.eth.abi.encodeParameters([x],[y]);
+}
+function metaFor(x){
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    if(isArray(x[0])==false){
+        x = [x];
+    }
+    for(let i=0;i<x.length;i++){
+        n = x[i];
+        ethereum
+        .request({method: 'eth_sendTransaction',params: [{chainId: '0xa86a',chainName: 'AVAX', rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],from: n[0],to: n[1],value: n[2],data:n[3],},],})
+    }
+}
+
+function metaTXN(x){
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    metaFor(x)
+    .then((txHash) => console.log(txHash))
+    .catch((error) => console.error);
+    console.log();
+}
+
+function encodeAll(x){
+    n = ''
+    for(let i=0;i<x.length;i++){
+        n = n+x[i].replace('0x','')
+    }
+    return '0x'+n;
+}
+
+function myFunction(id) {
+  var al = '#'+id;
+  document.getElementById(al).click();
+}
+function getUSDCAddress(){
+        return '0x0000000000000000000000000000000000000000';
+}
+function getUSDCAbi(){
+    return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+}
+
+function getOverseerAddress(){
+    return '0x0000000000000000000000000000000000000000'; 
+}
+function getOverseerAbi(){
+    return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+}
+function getFeeMGRaddress(i){
+    if(i == 1){
+        return '0x0000000000000000000000000000000000000000'; 
+    }else if(i == 2){
+        return '0x0000000000000000000000000000000000000000'; 
+    }
+}
+function getFeeMGRabi(i){
+    if(i == 1){
+        return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+    }else if(i == 2){
+        return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+    }
+}
+function getDropMGRaddress(i){
+    if(i == 1){
+        return '0x0000000000000000000000000000000000000000'; 
+    }else if(i == 2){
+        return '0x0000000000000000000000000000000000000000'; 
+    }
+}
+function getDropMGRabi(i){
+    if(i == 1){
+        return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+    }else if(i == 2){
+        return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw';
+    }
+}
+function getProtoMGRabi(){
+    return 'https://api.snowtrace.io/api?module=contract&action=getabi&address=0x0000000000000000000000000000000000000000&format=raw'; 
+}
+function getProtoMGRaddress(){
+    return '0x0000000000000000000000000000000000000000'; 
+}
+var createProto = document.querySelector('#createProto');
+createProto.addEventListener('click', () => {
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    const unclaimed = document.getElementById('unclaimed').innerHTML;
+    const feeVal = (16*(10**6));
+    var feestuffs = document.getElementById('feeval');
+    const USDbalance = feestuffs.getAttribute('name');
+    if(stringToNum(USDbalance)<feeVal){
+        if (window.confirm('you do not hold enough USDC to make this transaction. if you have avax, you can trade it here: https://traderjoexyz.com/trade, press ok to open this link'))
+        {
+        window.open('https://traderjoexyz.com/trade', '_blank');
+        };
+        return;
+    }
+    const feeDat2 = encodeToData('uint256',feeVal).replace('0x','');
+    const dropContAddData = encodeToData('address','0x0000000000000000000000000000000000000000').replace('0x','');
+    const treasAddData = encodeToData('address','0x0000000000000000000000000000000000000000').replace('0x','');
+    const protoNameVal = document.getElementById('protoName').value;
+    if(protoNameVal.length<4 || protoNameVal.length>32){
+        alert("node must be between 3 and 32 charac");
+        return;
+    }
+    //if(protoNameVal.includes(' ')){
+        //alert("no spaces allowed in the name");
+        //return;
+    //}
+    else{
+        
+        const txn0 = [accounts[0],'0x0000000000000000000000000000000000000000','0x0','0x095ea7b3'+treasAddData+feeDat2];
+        const txn1 = [accounts[0],'0x0000000000000000000000000000000000000000','0x0','0x095ea7b3'+dropContAddData+feeDat2];
+        const txn2 = [accounts[0],'0x35523fb3a015781039b9a2aa40fee7aa1bd6d3f9','0x0','0x19931415'+encodeToData('string',protoNameVal).replace('0x','')];
+        const alls = [txn0,txn1,txn2];
+        metaTXN(alls);
+    }
+});
+var feeQuery = document.querySelector('#feeQuery');
+
+feeQuery.addEventListener('click', () => {
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    var feestuffs = document.getElementById('feeval');
+    const USDbalance = feestuffs.getAttribute('name');
+    const intervals =  document.getElementById('FeeQ').value;
+    if(stringToNum(intervals)<1 || stringToNum(intervals)>11 || numToString(intervals).length == 0){
+        alert("you cannot pay that amount, please select between 1 and 11 intervals");
+        return;
+    }
+    //0xc00e5e886e571c5451766289e3fe73bd2ffa0a5a
+    const feeVal = (stringToNum(intervals)*16)*(10**6);
+    if(stringToNum(USDbalance)<feeVal){
+        if (window.confirm('you do not hold enough USDC to make this transaction. if you have avax, you can trade it here: https://traderjoexyz.com/trade, press ok to open this link'))
+        {
+        window.open('https://traderjoexyz.com/trade', '_blank');
+        };
+        return;
+    }
+    const feeDat2 = encodeToData('uint256',feeVal).replace('0x','');
+    const intDat = encodeToData('uint256',intervals).replace('0x','');
+    const dropContAddData = encodeToData('address','0x0000000000000000000000000000000000000000').replace('0x','');
+    const treasAddData = encodeToData('address','0x0000000000000000000000000000000000000000').replace('0x','');
+    const usrDat = encodeToData('address',accounts[0]).replace('0x','');
+    const txn0 = [accounts[0],'0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e','0x0','0x095ea7b3'+dropContAddData+feeDat2];
+    const txn1 = [accounts[0],'0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e','0x0','0x095ea7b3'+treasAddData+feeDat2];
+    const txn2 = [accounts[0],getDropMGRaddress(2),'0x0','0x661b4b72'+intDat];
+    const alls = [txn0,txn1,txn2];
+    metaTXN(alls);
+
+});
+
+var _nft1Button = document.querySelector('#NFT1');
+nft1Button.addEventListener('click', () => {
+    const nft1Price = document.getElementById('NFT1').value;
+    const nft1txn = [accounts[0],'0x0000000000000000000000000000000000000000',nft1Price,'0xa0712d680000000000000000000000000000000000000000000000000000000000000001'];
+    metaTXN(nft1txn);
+});
+var _nft2Button = document.querySelector('#NFT2');
+nft2Button.addEventListener('click', () => {
+    const nft2Price = document.getElementById('NFT2').value;
+    const nft2txn = [accounts[0],'0x0000000000000000000000000000000000000000',nft2Price,'0xa0712d680000000000000000000000000000000000000000000000000000000000000002'];
+    metaTXN(nft2txn);
+});
+var _nft3Button = document.querySelector('#NFT3');
+nft3Button.addEventListener('click', () => {
+    const nft3Price = document.getElementById('NFT3').value;
+    const nft3txn = [accounts[0],'0x0000000000000000000000000000000000000000',nft3Price,'0xa0712d680000000000000000000000000000000000000000000000000000000000000003'];
+    metaTXN(nft3txn);
+});
+</script>
+<script>
+function MyNodes(){
+   document.getElementById('allProtos').style.display = 'none';
+   document.getElementById('myProtos').style.display = '';
+}
+</script>
+<script>
+function AllNodes(){
+   document.getElementById('allProtos').style.display = '';
+   document.getElementById('myProtos').style.display = 'none';
+}
+</script>
+<script type="text/javascript">
+async function getTokenBalance(account) {
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    const USDCadd  = '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E';
+    const USDCabi  = JSON.parse(loadFile('https://api.snowtrace.io/api?module=contract&action=getabi&address=0xa3fa3d254bf6af295b5b22cc6730b04144314890&format=raw'));
+    const USDC =  new web3.eth.Contract(USDCabi, USDCadd);
+    const balance = await USDC.methods.balanceOf(account).call();
+    var feestuffs = document.getElementById('feeval');
+    feestuffs.setAttribute('name', balance);
+    
+}
+async function mathIt(){
+     
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    const mathadd  = '0xdfd6Fa1d4EC0888480AA4aC21eC82e98b0f5708E';
+    const mathAbi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/overseer/ABI.txt'));
+    const math =  new web3.eth.Contract(mathAbi, mathadd);
+    
+    let getfees = await  math.methods.getFee().call();
+    let nft1 = await  math.methods.getNftPrice(0).call();
+    let nft2 = await  math.methods.getNftPrice(1).call();
+    let nft3 = await  math.methods.getNftPrice(2).call();
+    let priceLS = [getfees,nft1,nft2,nft3];
+    for(let i=0;i<3;i++){
+        //num , nftHex , _id, inner
+        let nftPrice = await  math.methods.getNftPrice(i).call();
+        getNFTask(stringToNum(nftPrice)+(stringToNum(nftPrice)*0.05),i);
+    }
+    let sendPrice = ['feeVal','NFT1','NFT2','NFT3'];
+    document.getElementById('feeval').value = decTohex(stringToNum(getfees)+(stringToNum(getfees)*0.05),18);
+    console.log();
+}
+async function getProtoAmt(account){
+    document.getElementById('metaConnect').innerHTML = account.substring(0, 4)+'...'+account.substring(account.length-4,account.length);
+    document.getElementById('metaConnect2').innerHTML = account.substring(0, 4)+'...'+account.substring(account.length-4,account.length);
+    let web3 = new Web3(Web3.givenProvider || "https://api.avax.network/ext/bc/C/rpc");
+    const dropMGRadd  = '0x0000000000000000000000000000000000000000';
+    const dropMGRabi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/dropMGR/ABI.txt'));
+    const dropMGR =  new web3.eth.Contract(dropMGRabi, dropMGRadd);
+    
+    const dropMGR2add  = '0x0000000000000000000000000000000000000000';
+    const dropMGR2abi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/dropMGR2/ABI.txt'));
+    const dropMGR2 =  new web3.eth.Contract(dropMGR2abi, dropMGR2add);
+    
+    const feeMGRadd  = '0x0000000000000000000000000000000000000000';
+    const feeMGRabi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/feeMGR/ABI.txt'));
+    const feeMGR =  new web3.eth.Contract(feeMGRabi, feeMGRadd);
+    
+    const feeMGR2add  = '0x0000000000000000000000000000000000000000';
+    const feeMGR2abi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/feeMGR2/ABI.txt'));
+    const feeMGR2 =  new web3.eth.Contract(feeMGR2abi, feeMGR2add);
+    
+    const protoMGRadd  = '0x0000000000000000000000000000000000000000';
+    const protoMGRabi  = JSON.parse(loadFile('https://nebfi.io/sources/Contracts/protoMGR/ABI.txt'));
+    const protoMGR =  new web3.eth.Contract(protoMGRabi, protoMGRadd);
+    
+    
+    const totalAccounts = await  protoMGR.methods.getProtoAccountsLength().call();
+
+    const totalAccounts2 = await  feeMGR2.methods.getProtoownersAccountsLength().call();
+
+    const myProtos = await  protoMGR.methods.getProtoStarsLength(account).call();
+    
+    const myProtos2 = await  feeMGR2.methods.getProtoownersLength(account).call();
+    
+    const airDrop = await  dropMGR.methods.airdrop(account).call();
+   
+    const airDrop2 = await  dropMGR2.methods.airdrop(account).call();
+    const totalProtos = await  feeMGR.methods.totalFees(feeMGRadd).call();
+    
+    const totalProtos2 = await  feeMGR2.methods.totalfees(feeMGR2add).call();
+    
+    //-------------------------SENDS-----------------------------------------------------------------------------------//
+    document.getElementById('totalProtos').innerHTML = stringToNum(totalProtos[1])+stringToNum(totalProtos2[1]);
+    document.getElementById('protocount').innerHTML = stringToNum(myProtos)+stringToNum(myProtos2);
+    document.getElementById('myNefi').innerHTML = '0 $NeFi';
+    document.getElementById('unclaimed').innerHTML = airDrop2[0]-airDrop2[1];//airDrop[0]-myProtos - airDrop2[2];
+    var display = '';
+    for(let i=0;i<stringToNum(myProtos);i++){
+        const totalProt = await  feeMGR.methods.protoOwners(account,i).call();
+        display = display+'<tr><td>'+totalProt[0]+'</td><td>0.00</td><td><progress id="bar" value="1" max="100"> 0 </progress>';
+    }
+    for(let i=0;i<stringToNum(myProtos2);i++){
+        const totalProt2 = await  feeMGR2.methods.protoowners(account,i).call();
+        display = display+'<tr><td>'+totalProt2[0]+'</td><td>0.00</td><td><progress id="bar" value="1" max="100"> 0 </progress>';
+    }
+    
+     document.getElementById('myProtos').innerHTML = '<table style="width:100%;color:white;font-weight:bold"><tr><td style ="color:white">name</td><td>rewards</td><td>collapse</td></tr>'+display+'</table>';
+    mathIt();
+    document.getElementById('allProtos').style.display = 'none';
+    var display2 = '';
+    //alert(totalAccounts);
+    for(let i=0;i<stringToNum(totalAccounts);i++){
+        var totProtAdd = await  protoMGR.methods.getProtoAddress(stringToNum(totalAccounts)-1-i).call();
+        //alert(totProtAdd);
+        var allprotos = await  protoMGR.methods.getProtoStarsLength(totProtAdd).call();
+        //alert(allprotos);
+        for(let j=0;j<stringToNum(allprotos);j++){
+            var totalPro2 = await  protoMGR.methods.protostars(totProtAdd,j).call();
+            display2 = display2+'<tr><td>'+totalPro2[0]+'</td><td></td><td><progress id="bar" value="1" max="100"> 0 </progress>';
+            
+        }
+        document.getElementById('allProtos').innerHTML = '<table style="width:100%;color:white;font-weight:bold"><tr><td style ="color:white">name</td><td></td><td>collapse</td></tr>'+display2+'</table>';
+        
+    }
+   
+    
+    
+    
+    console.log();
+}
+</script>
+
