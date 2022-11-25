@@ -29,8 +29,6 @@ async function getAccount() {
     getProtoAmt(account);
     
     }
-
-
 function feequery(ints){
     var _intervals = ascii_to_hex(ints);
     let _join = ['0x276516e7',_intervals];
